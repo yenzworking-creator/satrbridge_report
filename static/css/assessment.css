@@ -786,3 +786,34 @@ textarea {
     align-items: flex-start !important; /* Align to top so large ring doesn't push summary weirdly */
 }
 
+
+/* --- Refined Score Alignment (Final) --- */
+.score-ring {
+    /* Ensure sufficient height for the semi-circle + text below */
+    height: 180px !important; 
+    width: 300px !important; /* Wider to prevent crop */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Align chart to bottom? No, top */
+    margin-bottom: 2rem; /* Space for text below if needed */
+}
+
+/* Move the score text to perfectly sit inside/below the arc */
+.score-value {
+    top: auto !important;
+    bottom: 0 !important; /* Align to bottom of the box */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+}
+
+.score-value .number {
+    font-size: 4.5rem !important;
+    line-height: 0.8 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.score-value .label {
+    font-size: 1rem !important;
+}
+

@@ -9,6 +9,8 @@
 3. 預計業種：{{1.request_info.industry}}
 4. 店面坪數：{{1.request_info.area_size}} 坪
 5. 預計客單價：{{1.request_info.avg_consumption}} (單位：元)
+5.1. 目標客群：{{1.request_info.target_customers}}
+5.2. 營業時間：{{1.request_info.business_hours}}
 6. 捷運站名：{{1.market_stats.mrt_station}}
 7. 捷運月平均人流：{{1.market_stats.mrt_flow}} (單位：人次/月)
 8. 該里人口數據：
