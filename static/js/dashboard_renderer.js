@@ -226,6 +226,8 @@ function initCharts(data) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 r: {
                     angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
@@ -272,6 +274,9 @@ function initCharts(data) {
     if (data.cost_data_csv) {
         costData = data.cost_data_csv.split(',').map(Number);
     }
+    // Register Plugin
+    if (ChartDataLabels) Chart.register(ChartDataLabels);
+
     new Chart(document.getElementById('costChart'), {
         type: 'doughnut',
         data: {
@@ -282,7 +287,19 @@ function initCharts(data) {
                 borderWidth: 0
             }]
         },
-        options: commonOptions
+        options: {
+            ...commonOptions,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#ccc' } },
+                datalabels: {
+                    color: '#fff',
+                    font: { weight: 'bold', size: 14 },
+                    formatter: (value, ctx) => {
+                        return value + '%';
+                    }
+                }
+            }
+        }
     });
 
     // 5. Age Bar Chart

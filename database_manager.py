@@ -209,15 +209,37 @@ class DatabaseManager:
                 print(f"❌ [DB Error] Tax lookup failed: {e}")
 
         if self.mrt_df is not None and mrt_station_name:
+            # Clean: "捷運江子翠站" -> "江子翠"
             clean_station = mrt_station_name.replace("捷運", "").replace("站", "")
-            try:
-                match_row = self.mrt_df[self.mrt_df.iloc[:, 0].astype(str).str.contains(clean_station)]
-                if not match_row.empty:
-                    row = match_row.iloc[0]
-                    numeric_cols = row[pd.to_numeric(row, errors='coerce').notnull()]
-                    if len(numeric_cols) > 0:
-                        result['MRT_Flow'] = int(numeric_cols.sum())
-            except: pass
+            
+            # Search COLUMNS not Rows
+            target_col = None
+            
+            # 1. Exact Match on Clean
+            if clean_station in self.mrt_df.columns:
+                target_col = clean_station
+            
+            # 2. Try adding "站" (e.g. "台北車站")
+            elif clean_station + "站" in self.mrt_df.columns:
+                target_col = clean_station + "站"
+
+            # 3. Fuzzy Match in Columns
+            else:
+                for col in self.mrt_df.columns:
+                    if clean_station in str(col):
+                        target_col = col
+                        break
+            
+            if target_col:
+                print(f"✅ [DB Success] 找到捷運站數據: {target_col}")
+                # Sum the column, ignoring non-numeric (first row usually ok if skipped by header)
+                # But read_excel usually handles numeric.
+                try:
+                    result['MRT_Flow'] = int(self.mrt_df[target_col].sum())
+                except:
+                    result['MRT_Flow'] = 0
+            else:
+                print(f"⚠️ [DB Warning] 找不到捷運站: {clean_station} (Columns checked)")
 
         return result
 

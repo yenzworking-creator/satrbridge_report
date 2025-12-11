@@ -730,3 +730,59 @@ textarea {
 .chart-card {
     min-height: 350px;
 }
+/* --- Final Hardened Layout Fixes --- */
+
+/* Force Analysis Grid to Stack (1 Column) */
+.analysis-grid {
+    grid-template-columns: 100% !important;
+    display: grid;
+    gap: 1.5rem;
+}
+
+/* Force Score Value Positioning */
+.score-value {
+    top: 70% !important; /* Move down significantly */
+    left: 50% !important;
+    transform: translate(-50%, 0) !important; /* Change transform origin */
+    width: 200px;
+}
+
+.score-value .number {
+    margin-bottom: 0.2rem;
+}
+
+.score-value .label {
+    display: block;
+    margin-top: 0.5rem;
+}
+
+
+/* Safety: Prevent infinite chart resizing loop */
+.chart-wrapper {
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
+
+/* --- Fix Hero Layout (Graph 1) --- */
+.score-ring {
+    width: 250px !important;
+    height: 250px !important;
+    margin: 0 auto; /* Center it */
+}
+
+.score-value {
+    top: 60% !important; /* Move text nicely inside the larger ring */
+    width: 100% !important;
+}
+
+.score-value .number {
+    font-size: 3.5rem !important; /* Ensure it pops */
+    margin-bottom: 0px !important;
+}
+
+/* Fix Hero Container alignment */
+.dashboard-hero {
+    align-items: flex-start !important; /* Align to top so large ring doesn't push summary weirdly */
+}
+
