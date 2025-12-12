@@ -116,7 +116,7 @@ class ReportService:
         try:
             # Short timeout? No, report gen might take a few seconds.
             # MAKE custom webhook waits for response action, so we wait.
-            response = requests.post(MAKE_WEBHOOK_URL, json=payload, timeout=60)
+            response = requests.post(MAKE_WEBHOOK_URL, json=payload, timeout=170)
             
             if response.status_code == 200:
                 # Expecting textual body if MAKE responds nicely, or JSON
