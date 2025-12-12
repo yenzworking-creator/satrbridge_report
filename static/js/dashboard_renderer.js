@@ -33,24 +33,108 @@ function renderDashboard(data) {
     // If wrapped in 'result', unwrap it
     if (aiResult.result) aiResult = aiResult.result;
 
+    // --- DATA SOURCE EXTRACTION ---
+    const dataSources = new Set(); // Use Set to avoid duplicates
+
+    function cleanAndCollectSources(text) {
+        if (!text) return '';
+        // Regex to find [資料來源：...] or [資料來源:...] or similar
+        // Captures the content inside the brackets
+        const regex = /\[?資料來源[：:]\s*(.*?)\]/g;
+
+        let cleanedText = text.replace(regex, (match, sourceContent) => {
+            if (sourceContent) {
+                dataSources.add(sourceContent.trim());
+            }
+            return ''; // Remove from original text
+        });
+
+        // Remove left-over empty brackets if any (optional cleanup)
+        // cleanedText = cleanedText.replace(/\[\s*\]/g, ''); 
+
+        return cleanedText;
+    }
+
+    // Apply cleaning to all text fields
+    aiResult.population_body = cleanAndCollectSources(aiResult.population_body);
+    aiResult.rent_body = cleanAndCollectSources(aiResult.rent_body);
+    aiResult.competition_body = cleanAndCollectSources(aiResult.competition_body);
+    aiResult.function_body = cleanAndCollectSources(aiResult.function_body);
+    aiResult.space_body = cleanAndCollectSources(aiResult.space_body);
+    aiResult.financial_body = cleanAndCollectSources(aiResult.financial_body);
+    aiResult.marketing_body = cleanAndCollectSources(aiResult.marketing_body);
+    aiResult.conclusion_text = cleanAndCollectSources(aiResult.conclusion_text);
+    // Also check summary just in case
+    aiResult.summary_text = cleanAndCollectSources(aiResult.summary_text);
+
+
     // --- BUILD HTML STRUCTURE ---
+
+    // --- PDF Header & Footer Injection (Visual Only) ---
+    const pdfHeader = document.createElement('div');
+    pdfHeader.className = 'pdf-header-visual';
+    pdfHeader.innerHTML = `
+        <div class="header-left">
+            <img src="/static/brand_assets/pdf_logo.png" alt="StarBridge Media" style="height: 40px;">
+        </div>
+        <div class="header-right">${new Date().toLocaleDateString()} | 專業評估報告</div>
+    `;
+
+    const pdfFooter = document.createElement('div');
+    pdfFooter.className = 'pdf-footer-visual';
+    pdfFooter.innerHTML = `
+        <div class="footer-content">
+            <p>本報告由 AI 大數據系統自動生成，僅供商業決策參考，不保證獲利。</p>
+            <p>Tidal Cassini Intelligent System | © 2025 StarBridge Media</p>
+        </div>
+    `;
+
+    // Prepend Header
+    container.appendChild(pdfHeader);
 
     // A. Score & Summary Section (Hero)
     const heroSection = document.createElement('div');
     heroSection.className = 'dashboard-hero';
+
+    // Construct Map URL
+    let mapHtml = '';
+    if (aiResult.lat && aiResult.lng && aiResult.google_maps_key) {
+        const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${aiResult.lat},${aiResult.lng}&zoom=15&size=400x300&markers=color:red%7C${aiResult.lat},${aiResult.lng}&key=${aiResult.google_maps_key}`;
+        mapHtml = `
+            <div class="location-map" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center;">
+                <img src="${mapUrl}" alt="Location Map" style="height: 160px; width: auto; max-width: 100%; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            </div>
+        `;
+    }
+
+    // New Layout: Top Row (Score + Map), Bottom (Text)
     heroSection.innerHTML = `
-        <div class="score-card">
-            <div class="score-ring">
-                <canvas id="scoreChart"></canvas>
-                <div class="score-value">
-                    <span class="number">${aiResult.score || '-'}</span>
-                    <span class="label">綜合評分</span>
+        <div class="hero-top-row" style="display: flex; flex-wrap: wrap; gap: 40px; align-items: stretch; margin-bottom: 24px;">
+            <!-- Left: Score -->
+            <div class="score-card" style="transform: none; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 200px;">
+                <div class="score-ring" style="width: 160px; height: 160px; position: relative;">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+                <div class="score-value-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; margin-top:20px;">
+                    <span class="number" style="font-size: 3.5rem; font-weight: 700; color: #ff7e33; line-height: 1;">${aiResult.score || '-'}</span>
+                    <span class="label" style="font-size: 1rem; color: #666;">綜合評分</span>
                 </div>
             </div>
+            
+            <!-- Right: Map -->
+            ${mapHtml}
         </div>
-        <div class="hero-summary">
-            <h3><i class="fa-solid fa-robot"></i> AI 評估總結</h3>
-            <div class="summary-text">${formatText(aiResult.summary_text || aiResult.summary || '無總結資料')}</div>
+        <!-- Bottom: Summary Text -->
+        <div class="hero-summary" style="width: 100%; background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #333;">
+            <h3 style="margin-top: 0; font-size: 1.1rem; color: #333; margin-bottom: 12px;"><i class="fa-solid fa-robot"></i> AI 評估總結</h3>
+            
+            <!-- Context Banner -->
+            <div style="background: #eef2f5; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.9rem; color: #555;">
+                <i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> 
+                <strong>評估基準：</strong> 針對 <u>${aiResult.user_target || '一般大眾'}</u> 客群，於 <u>${aiResult.user_hours || '標準時段'}</u> 營業之綜合分析。
+            </div>
+
+            <div class="summary-text" style="line-height: 1.6; color: #444;">${formatText(aiResult.summary_text || aiResult.summary || '無總結資料')}</div>
         </div>
     `;
     container.appendChild(heroSection);
@@ -169,163 +253,227 @@ function renderDashboard(data) {
     `;
     container.appendChild(analysisSection);
 
+    // E. Data Sources Footer (New Section)
+    if (dataSources.size > 0) {
+        const footerSection = document.createElement('div');
+        footerSection.className = 'dashboard-footer source-section full-width';
+
+        let sourceListHtml = '<ul>';
+        dataSources.forEach(source => {
+            sourceListHtml += `<li><i class="fa-solid fa-quote-left"></i> ${source}</li>`;
+        });
+        sourceListHtml += '</ul>';
+
+        footerSection.innerHTML = `
+            <h4><i class="fa-solid fa-book-open"></i> 資料來源彙整</h4>
+            <div class="source-list">
+                ${sourceListHtml}
+            </div>
+        `;
+        // Append to the wrapper directly or create a new row? 
+        // Let's append to container to keep it at the very bottom
+        container.appendChild(footerSection);
+    }
+
     // --- RENDER CHARTS (Chart.js) ---
     requestAnimationFrame(() => {
         initCharts(aiResult);
     });
 }
 
+// Global store for chart instances
+window.chartInstances = {};
+
 function initCharts(data) {
+    // Helper to properly destroy old chart instance
+    const destroyChart = (id) => {
+        if (window.chartInstances[id]) {
+            window.chartInstances[id].destroy();
+        }
+    };
+
+    // --- CHARTS ---
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'bottom', labels: { color: '#ccc' } }
+            legend: { position: 'bottom', labels: { color: '#666' } }
         }
     };
 
-    // 1. Score Gauge (Doughnut)
-    const score = parseFloat(data.score) || 0;
-    new Chart(document.getElementById('scoreChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['得分', '剩餘'],
-            datasets: [{
-                data: [score, 10 - score],
-                backgroundColor: ['#ff7e33', 'rgba(255, 255, 255, 0.1)'],
-                borderWidth: 0,
-                cutout: '85%'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            rotation: -90,
-            circumference: 180,
-        }
-    });
+    // Helper for safe parsing
+    const safeParseFloat = (value) => {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
+    // 1. Score Chart
+    try {
+        destroyChart('scoreChart');
+        const scoreVal = safeParseFloat(data.score);
+        console.log("Rendering Score Chart:", scoreVal);
+        window.chartInstances['scoreChart'] = new Chart(document.getElementById('scoreChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['得分', '剩餘'],
+                datasets: [{
+                    data: [scoreVal, 10 - scoreVal],
+                    backgroundColor: ['#ff7e33', '#e0e0e0'],
+                    borderWidth: 0,
+                    cutout: '85%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                rotation: -90,
+                circumference: 180,
+            }
+        });
+    } catch (e) { console.error("Score Chart Error:", e); }
 
     // 2. Radar Chart
-    // Fake data logic if not provided (placeholder for now)
-    // We can infer some from score or random drift around score
-    const baseScore = Math.floor(score);
-    new Chart(document.getElementById('radarChart'), {
-        type: 'radar',
-        data: {
-            labels: ['人流人氣', '租金優勢', '競品分析', '消費潛力', '交通便利'],
-            datasets: [{
-                label: '本案評分',
-                data: [baseScore, Math.min(10, baseScore + 1), Math.max(1, baseScore - 1), baseScore, Math.min(10, baseScore + 2)],
-                backgroundColor: 'rgba(255, 126, 51, 0.2)',
-                borderColor: '#ff7e33',
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#ff7e33',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: '#ff7e33'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    pointLabels: { color: '#ccc', font: { size: 12 } },
-                    suggestedMin: 0,
-                    suggestedMax: 10
-                }
+    try {
+        destroyChart('radarChart');
+        const scoreVal = safeParseFloat(data.score);
+        const baseScore = Math.floor(scoreVal) || 5;
+        window.chartInstances['radarChart'] = new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['人流人氣', '租金優勢', '競品分析', '消費潛力', '交通便利'],
+                datasets: [{
+                    label: '本案評分',
+                    data: [baseScore, Math.min(10, baseScore + 1), Math.max(1, baseScore - 1), baseScore, Math.min(10, baseScore + 2)],
+                    backgroundColor: 'rgba(255, 126, 51, 0.2)',
+                    borderColor: '#ff7e33',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#ff7e33',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#ff7e33'
+                }]
             },
-            plugins: { legend: { display: false } }
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                        pointLabels: { color: '#666', font: { size: 12 } },
+                        suggestedMin: 0,
+                        suggestedMax: 10,
+                        ticks: { backdropColor: 'transparent', color: '#666' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    } catch (e) { console.error("Radar Chart Error:", e); }
 
     // 3. Finance Bar Chart
-    const revenue = (data.daily_revenue || 0) * 30;
-    // Need Rent? Assuming passed in data or we estimate.
-    // Hack: if rent not in AI result, we might need it from backend. 
-    // For now, let's look for it in data or default.
-    const rent = 50000; // Placeholder if missing
-    new Chart(document.getElementById('financeChart'), {
-        type: 'bar',
-        data: {
-            labels: ['預估月營收', '預估月租金'],
-            datasets: [{
-                label: '金額 (TWD)',
-                data: [revenue, rent],
-                backgroundColor: ['#2ecc71', '#e74c3c'],
-                borderRadius: 5
-            }]
-        },
-        options: {
-            ...commonOptions,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#ccc' } },
-                x: { grid: { display: false }, ticks: { color: '#ccc' } }
+    try {
+        destroyChart('financeChart');
+        const revenue = safeParseFloat(data.daily_revenue || 0) * 30;
+        const rent = safeParseFloat(data.rent_cost || 50000);
+
+        window.chartInstances['financeChart'] = new Chart(document.getElementById('financeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['預估月營收', '預估月租金'],
+                datasets: [{
+                    label: '金額 (TWD)',
+                    data: [revenue, rent],
+                    backgroundColor: ['#2ecc71', '#e74c3c'],
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                ...commonOptions,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { color: '#666' } },
+                    x: { grid: { display: false }, ticks: { color: '#666' } }
+                }
             }
-        }
-    });
+        });
+    } catch (e) { console.error("Finance Chart Error:", e); }
 
     // 4. Cost Doughnut
-    // Parsing CSV string "20,30,10,40"
-    let costData = [25, 25, 35, 15]; // default
-    if (data.cost_data_csv) {
-        costData = data.cost_data_csv.split(',').map(Number);
-    }
-    // Register Plugin
-    if (ChartDataLabels) Chart.register(ChartDataLabels);
+    try {
+        destroyChart('costChart');
+        let costData = [25, 25, 35, 15]; // default
+        if (data.cost_data_csv) {
+            costData = data.cost_data_csv.split(',').map(Number);
+        } else if (data.cost_data_csv) { // Fallback check
+            costData = data.cost_data_csv.split(',').map(Number);
+        }
 
-    new Chart(document.getElementById('costChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['租金', '人力', '食材', '其他'],
-            datasets: [{
-                data: costData,
-                backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#95a5a6'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            ...commonOptions,
-            plugins: {
-                legend: { position: 'bottom', labels: { color: '#ccc' } },
-                datalabels: {
-                    color: '#fff',
-                    font: { weight: 'bold', size: 14 },
-                    formatter: (value, ctx) => {
-                        return value + '%';
+        // Register Plugin Safely
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
+        window.chartInstances['costChart'] = new Chart(document.getElementById('costChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['租金', '人力', '食材', '其他'],
+                datasets: [{
+                    data: costData,
+                    backgroundColor: ['#e74c3c', '#f1c40f', '#3498db', '#95a5a6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                ...commonOptions,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#666',
+                            boxWidth: 12,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 14 },
+                        formatter: (value) => value + '%'
                     }
                 }
             }
-        }
-    });
+        });
+    } catch (e) { console.error("Cost Chart Error:", e); }
 
     // 5. Age Bar Chart
-    let ageData = [5, 15, 30, 25, 15, 5, 5];
-    if (data.age_data_csv) {
-        ageData = data.age_data_csv.split(',').map(Number);
-    }
-    new Chart(document.getElementById('ageChart'), {
-        type: 'bar',
-        data: {
-            labels: ['0-15', '16-25', '26-35', '36-45', '46-55', '56-65', '65+'],
-            datasets: [{
-                label: '佔比 (%)',
-                data: ageData,
-                backgroundColor: '#ff7e33',
-                borderRadius: 4
-            }]
-        },
-        options: {
-            ...commonOptions,
-            scales: {
-                y: { display: false },
-                x: { grid: { display: false }, ticks: { color: '#ccc' } }
-            }
+    try {
+        destroyChart('ageChart');
+        let ageData = [5, 15, 30, 25, 15, 5, 5];
+        if (data.age_data_csv) {
+            ageData = data.age_data_csv.split(',').map(Number);
         }
-    });
+
+        window.chartInstances['ageChart'] = new Chart(document.getElementById('ageChart'), {
+            type: 'bar',
+            data: {
+                labels: ['0-15', '16-25', '26-35', '36-45', '46-55', '56-65', '65+'],
+                datasets: [{
+                    label: '佔比 (%)',
+                    data: ageData,
+                    backgroundColor: '#ff7e33',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: { display: false },
+                    x: { grid: { display: false }, ticks: { color: '#666' } }
+                }
+            }
+        });
+    } catch (e) { console.error("Age Chart Error:", e); }
 }
 
 // Helper: Format large numbers with commas

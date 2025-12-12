@@ -2,11 +2,16 @@
     --primary-color: #ff7e33;
     /* Brand Orange */
     --primary-hover: #ff9554;
-    --bg-dark: #0a0b10;
-    --bg-panel: rgba(20, 22, 30, 0.7);
-    --text-main: #ffffff;
-    --text-muted: #a0a5b0;
-    --border-color: rgba(255, 255, 255, 0.1);
+    --bg-dark: #f8f9fa;
+    /* Changed to Light Gray */
+    --bg-panel: rgba(255, 255, 255, 0.9);
+    /* Changed to White */
+    --text-main: #333333;
+    /* Changed to Dark Gray */
+    --text-muted: #666666;
+    /* Changed to Medium Gray */
+    --border-color: rgba(0, 0, 0, 0.1);
+    /* Changed to faint black */
     --success-color: #2ecc71;
     --font-main: 'Inter', 'Noto Sans TC', sans-serif;
 }
@@ -34,11 +39,10 @@ body {
     width: 100%;
     height: 100%;
     background:
-        radial-gradient(circle at 10% 20%, rgba(255, 126, 51, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 10% 20%, rgba(255, 126, 51, 0.05) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.05) 0%, transparent 40%),
-        linear-gradient(rgba(10, 11, 16, 0.9), rgba(10, 11, 16, 0.9)),
-        url("https://www.transparenttextures.com/patterns/cubes.png");
-    /* Subtle texture */
+        linear-gradient(#f4f6f8, #eef2f5);
+    /* Light gradient */
     z-index: -1;
 }
 
@@ -47,7 +51,7 @@ body {
     display: flex;
     align-items: center;
     padding: 1.5rem 5%;
-    background: rgba(10, 11, 16, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -100,13 +104,61 @@ body {
     animation: fadeInDown 0.8s ease;
 }
 
+
 .intro-section h2 {
     font-size: 2rem;
     margin-bottom: 0.5rem;
-    background: linear-gradient(90deg, #fff, #a0a5b0);
+    background: linear-gradient(90deg, #d35400, #2c3e50);
+    /* Dark Orange to Dark Blue */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* Standard property */
 }
+
+/* ... existing code ... */
+
+/* --- Refined Score Alignment (Vertical Stack) --- */
+.score-ring {
+    height: 160px !important;
+    /* Slightly reduced height for canvas area */
+    width: 300px !important;
+    margin: 0 auto;
+    /* Center horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Align bottom of canvas */
+    position: relative;
+    /* Removed absolute positioning logic */
+}
+
+
+
+.score-value-container {
+    text-align: center;
+    margin-top: -30px;
+    /* Pull up slightly into the arc */
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.score-value-container .number {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary-color);
+    display: block;
+}
+
+.score-value-container .label {
+    font-size: 1rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 5px;
+}
+
 
 .intro-section p {
     color: var(--text-muted);
@@ -168,11 +220,11 @@ label {
 input,
 select,
 textarea {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
+    background: #ffffff;
+    border: 1px solid #dcdfe6;
     border-radius: 8px;
     padding: 0.8rem 1rem;
-    color: white;
+    color: var(--text-main);
     font-family: inherit;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -183,15 +235,15 @@ select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.08);
+    background: #fff;
     box-shadow: 0 0 0 3px rgba(255, 126, 51, 0.1);
 }
 
 /* Ensure options are visible */
 option {
-    background-color: #14161e;
+    background-color: #ffffff;
     /* Match panel bg */
-    color: white;
+    color: var(--text-main);
 }
 
 .mt-2 {
@@ -404,7 +456,7 @@ textarea {
 
 /* Report Preview Container */
 .report-preview {
-    background: rgba(255, 255, 255, 0.05);
+    background: #f9f9fa;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 2rem;
@@ -474,7 +526,7 @@ textarea {
     gap: 5rem;
     /* Increased from 3rem */
     margin-bottom: 3rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 3rem;
@@ -503,7 +555,7 @@ textarea {
 
 .summary-text {
     font-size: 1.1rem;
-    color: #e0e0e0;
+    color: #444;
     line-height: 1.8;
 }
 
@@ -559,7 +611,7 @@ textarea {
 .metric-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-main);
 }
 
 .chart-card h4 {
@@ -609,7 +661,7 @@ textarea {
 }
 
 .strategy-block h4 {
-    color: white;
+    color: var(--text-main);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -617,7 +669,7 @@ textarea {
 }
 
 .strategy-block p {
-    color: #ccc;
+    color: #555;
     padding-left: 1.8rem;
 }
 
@@ -650,7 +702,8 @@ textarea {
 
 .analysis-card:hover {
     border-color: var(--primary-color);
-    background: rgba(20, 22, 30, 0.9);
+    background: #ffffff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .analysis-card h4 {
@@ -660,12 +713,12 @@ textarea {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     padding-bottom: 0.8rem;
 }
 
 .analysis-text {
-    color: #e0e0e0;
+    color: #444;
     line-height: 1.8;
     font-size: 0.95rem;
     white-space: pre-line;
@@ -730,6 +783,7 @@ textarea {
 .chart-card {
     min-height: 350px;
 }
+
 /* --- Final Hardened Layout Fixes --- */
 
 /* Force Analysis Grid to Stack (1 Column) */
@@ -741,9 +795,11 @@ textarea {
 
 /* Force Score Value Positioning */
 .score-value {
-    top: 70% !important; /* Move down significantly */
+    top: 70% !important;
+    /* Move down significantly */
     left: 50% !important;
-    transform: translate(-50%, 0) !important; /* Change transform origin */
+    transform: translate(-50%, 0) !important;
+    /* Change transform origin */
     width: 200px;
 }
 
@@ -768,40 +824,48 @@ textarea {
 .score-ring {
     width: 250px !important;
     height: 250px !important;
-    margin: 0 auto; /* Center it */
+    margin: 0 auto;
+    /* Center it */
 }
 
 .score-value {
-    top: 60% !important; /* Move text nicely inside the larger ring */
+    top: 60% !important;
+    /* Move text nicely inside the larger ring */
     width: 100% !important;
 }
 
 .score-value .number {
-    font-size: 3.5rem !important; /* Ensure it pops */
+    font-size: 3.5rem !important;
+    /* Ensure it pops */
     margin-bottom: 0px !important;
 }
 
 /* Fix Hero Container alignment */
 .dashboard-hero {
-    align-items: flex-start !important; /* Align to top so large ring doesn't push summary weirdly */
+    align-items: flex-start !important;
+    /* Align to top so large ring doesn't push summary weirdly */
 }
 
 
 /* --- Refined Score Alignment (Final) --- */
 .score-ring {
     /* Ensure sufficient height for the semi-circle + text below */
-    height: 180px !important; 
-    width: 300px !important; /* Wider to prevent crop */
+    height: 180px !important;
+    width: 300px !important;
+    /* Wider to prevent crop */
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Align chart to bottom? No, top */
-    margin-bottom: 2rem; /* Space for text below if needed */
+    align-items: flex-end;
+    /* Align chart to bottom? No, top */
+    margin-bottom: 2rem;
+    /* Space for text below if needed */
 }
 
 /* Move the score text to perfectly sit inside/below the arc */
 .score-value {
     top: auto !important;
-    bottom: 0 !important; /* Align to bottom of the box */
+    bottom: 0 !important;
+    /* Align to bottom of the box */
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 100% !important;
@@ -817,3 +881,41 @@ textarea {
     font-size: 1rem !important;
 }
 
+
+/* --- Fix Figure 1: Score Position --- */
+.score-value {
+    bottom: 35px !important;
+    /* Lift it up significantly from the bottom */
+}
+
+.score-ring {
+    margin-bottom: 0 !important;
+    /* Remove extra space below ring */
+    height: 160px !important;
+    /* Reduce height slightly to tighten spacing */
+}
+
+/* --- Utility Classes (Restored) --- */
+.hidden {
+    display: none !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+/* Ensure 'Other' input is visible when shown */
+#industryTypeOther {
+    display: block;
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Hide it properly if class is present (override above) */
+#industryTypeOther.hidden {
+    display: none !important;
+}

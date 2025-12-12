@@ -63,8 +63,25 @@ class DatabaseManager:
         try:
             mrt_file = os.path.join(self.data_dir, "202510各站進出量統計.xlsx")
             if os.path.exists(mrt_file):
-                self.mrt_df = pd.read_excel(mrt_file)
-        except: pass
+                # First, read without header to find the real header row
+                temp_df = pd.read_excel(mrt_file, header=None)
+                header_row_idx = 0
+                
+                # Check first 5 rows for station-like keywords
+                for i in range(5):
+                    row_str = temp_df.iloc[i].astype(str).values
+                    # A18/A19 are stations. "日期" is common. "進站" is common.
+                    if any("A18" in s or "A19" in s or "日期" in s or "車站" in s for s in row_str):
+                        header_row_idx = i
+                        break
+                
+                print(f"🚄 [MRT] Detected Header Row Index: {header_row_idx}")
+                self.mrt_df = pd.read_excel(mrt_file, header=header_row_idx)
+                # Clean columns (strip spaces)
+                self.mrt_df.columns = self.mrt_df.columns.astype(str).str.strip()
+                print(f"📊 [MRT Columns Sample]: {list(self.mrt_df.columns)[:5]}")
+        except Exception as e: 
+            print(f"❌ MRT Load Error: {e}")
             
         # 4. Rent (All files)
         rent_files = glob.glob(os.path.join(self.data_dir, "全台租金*.xls*"))
@@ -215,31 +232,58 @@ class DatabaseManager:
             # Search COLUMNS not Rows
             target_col = None
             
+            # Normalize Columns for search
+            cols = self.mrt_df.columns
+            
             # 1. Exact Match on Clean
-            if clean_station in self.mrt_df.columns:
+            if clean_station in cols:
                 target_col = clean_station
             
             # 2. Try adding "站" (e.g. "台北車站")
-            elif clean_station + "站" in self.mrt_df.columns:
+            elif clean_station + "站" in cols:
                 target_col = clean_station + "站"
 
-            # 3. Fuzzy Match in Columns
-            else:
-                for col in self.mrt_df.columns:
-                    if clean_station in str(col):
-                        target_col = col
-                        break
+            # 3. Robust Fuzzy Match
+            import re
+            def normalize_station_name(name):
+                # Remove English letters, Numbers, Spaces, "站", "捷運"
+                # Keep only Chinese characters mostly
+                s = str(name)
+                s = re.sub(r'[A-Za-z0-9\s]', '', s) # Remove Code A19
+                s = s.replace("捷運", "").replace("站", "").replace("車站", "")
+                return s
+
+            target_clean = normalize_station_name(clean_station)
+            
+            for col in cols:
+                col_clean = normalize_station_name(col)
+                if not target_clean or not col_clean: continue
+                
+                # Check exact match of "core" name
+                if target_clean == col_clean:
+                    target_col = col
+                    break
+                # Check contains
+                if target_clean in col_clean:
+                     target_col = col
+                     break
             
             if target_col:
-                print(f"✅ [DB Success] 找到捷運站數據: {target_col}")
+                print(f"✅ [DB Success] 找到捷運站數據: {target_col} (原始搜尋: {clean_station})")
                 # Sum the column, ignoring non-numeric (first row usually ok if skipped by header)
-                # But read_excel usually handles numeric.
                 try:
-                    result['MRT_Flow'] = int(self.mrt_df[target_col].sum())
-                except:
+                    # Convert to numeric, coerce errors to NaN, then sum
+                    result['MRT_Flow'] = int(pd.to_numeric(self.mrt_df[target_col], errors='coerce').sum())
+                    print(f"   -> 流量: {result['MRT_Flow']}")
+                except Exception as e:
+                    print(f"⚠️ Calculation Error: {e}")
                     result['MRT_Flow'] = 0
+            
             else:
-                print(f"⚠️ [DB Warning] 找不到捷運站: {clean_station} (Columns checked)")
+                print(f"⚠️ [DB Warning] 找不到捷運站: {clean_station} (Normalized Target: {target_clean})")
+                print(f"   -> First 5 Cols Normalized: {[normalize_station_name(c) for c in list(cols)[:5]]}")
+            
+
 
         return result
 

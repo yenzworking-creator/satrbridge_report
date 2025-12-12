@@ -8,13 +8,19 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/assessment.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/assessment.css') }}?v=3.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf_export.css') }}?v=3.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/assessment.css') }}?v=3.2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf_export.css') }}?v=3.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdns.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <!-- Chart.js for Dashboard -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="{{ url_for('static', filename='js/dashboard_renderer.js') }}"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_renderer_v2.js') }}?v=5.0"></script>
+    <script src="{{ url_for('static', filename='js/assessment.js') }}?v=5.0"></script>
 </head>
 
 <body>
@@ -22,9 +28,9 @@
 
     <header class="app-header">
         <div class="logo-container">
-            <div class="logo-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <img src="{{ url_for('static', filename='img/logo_header.png') }}" alt="Logo" class="logo-img">
             <div class="logo-text">
-                <h1>TIDAL CASSINI</h1>
+                <h1>Star Bridge</h1>
                 <span>智能選址評估系統</span>
             </div>
         </div>
@@ -88,16 +94,18 @@
                 </div>
             </div>
 
-            <div class="form-section">
+            <!-- Contact Info Hidden by User Request -->
+            <div class="form-section" style="display: none;">
                 <h3><i class="fa-regular fa-id-card"></i> 聯絡資訊</h3>
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="contactName">聯絡人姓名</label>
-                        <input type="text" id="contactName" name="contactName" required>
+                        <input type="text" id="contactName" name="contactName" value="Guest">
                     </div>
                     <div class="form-group">
                         <label for="contactEmail">電子信箱 <span class="required">*</span></label>
-                        <input type="email" id="contactEmail" name="contactEmail" required placeholder="接收報告用">
+                        <input type="email" id="contactEmail" name="contactEmail" value="guest@example.com" required
+                            placeholder="接收報告用">
                     </div>
                 </div>
             </div>
@@ -134,11 +142,289 @@
                     <a id="btnDownloadPdf" href="#" class="btn download-btn" target="_blank">
                         <i class="fa-solid fa-file-pdf"></i> 下載 PDF 報告
                     </a>
+                    <a id="btnDownloadImg" href="#" class="btn download-btn"
+                        style="background: #27ae60; margin-left: 10px;">
+                        <i class="fa-solid fa-image"></i> 下載圖片
+                    </a>
                     <button id="btnReset" class="btn text-btn">重新評估</button>
                 </div>
             </div>
             <div id="reportPreview" class="report-preview">
-                <!-- HTML Preview will be injected here -->
+                <!-- DASHBOARD TEMPLATE START (使用者可調整版型區域) -->
+                <!-- 使用 CSS Grid 確保版面穩固 -->
+                <style>
+                    /* 專用樣式 - 可在此直接調整版面 */
+                    .dashboard-container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 25px;
+                        padding: 20px;
+                        background: #fdfdfd;
+                    }
+
+                    /* 頭部區塊：左評分、右地圖 */
+                    .header-grid {
+                        display: grid;
+                        /* [可調整] 300px 是左側評分卡寬度，1fr 是右側地圖自動填滿 */
+                        grid-template-columns: 250px 1fr;
+
+                        gap: 20px;
+                        /* [可調整] 頂部區域高度，影響圓環與地圖的高度 */
+                        height: 250px;
+                    }
+
+                    @media (max-width: 768px) {
+                        .header-grid {
+                            grid-template-columns: 1fr;
+                            height: auto;
+                        }
+                    }
+
+                    /* 卡片通用樣式 */
+                    .dash-card {
+                        background: #fff;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    /* 評分卡內容置中 */
+                    .score-card-content {
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        position: relative;
+                    }
+
+                    /* 地圖填滿 */
+                    .map-fill {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        display: block;
+                    }
+
+                    /* 數據網格 (4格) */
+                    .metrics-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 15px;
+                    }
+
+                    .metric-box {
+                        background: #fff;
+                        padding: 20px;
+                        border-radius: 10px;
+                        text-align: center;
+                        border-left: 4px solid #ff7e33;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                    }
+
+                    /*圖表網格 (2x2) */
+                    .charts-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                    }
+
+                    @media (max-width: 900px) {
+                        .charts-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+
+                    .chart-box {
+                        background: #fff;
+                        padding: 20px;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+                        min-height: 350px;
+                    }
+                </style>
+
+                <!-- 實際 HTML 結構 (ID 用於 JS 填入數據) -->
+                <div id="dashboard-layout" class="dashboard-container">
+
+                    <!-- 1. 頭部: 評分與地圖 -->
+                    <div class="header-grid">
+                        <!-- 左側: 評分 -->
+                        <div class="dash-card">
+                            <div class="score-card-content">
+                                <canvas id="scoreChart"></canvas>
+                                <!-- [可調整] 絕對置中數值位置 -->
+                                <!-- top: 75% 控制垂直位置 (50% 為正中間), font-size 控制數字大小 -->
+                                <div
+                                    style="position: absolute; top: 75%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                                    <div id="val-score"
+                                        style="font-size: 2.5rem; font-weight: 700; color: #ff7e33; line-height: 2;">-
+                                    </div>
+                                    <div style="font-size: 0.95rem; color: #666;">綜合評分</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右側: 地圖 (JS 將替換 src) -->
+                        <div class="dash-card">
+                            <!-- 預設顯示載入中 -->
+                            <div id="map-container"
+                                style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999;">
+                                <img id="val-map-img" src="" class="map-fill hidden" style="display:none;"
+                                    crossorigin="anonymous">
+                                <span id="map-placeholder">地圖載入中...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. AI 總結 -->
+                    <div class="dash-card" style="padding: 25px;">
+                        <h3
+                            style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ff7e33; padding-bottom: 10px; margin-bottom: 15px;">
+                            <i class="fa-solid fa-robot"></i> AI 選址評估總結
+                        </h3>
+                        <div
+                            style="background: #f8f9fa; padding: 12px; margin-bottom: 15px; border-radius: 6px; font-size: 0.95rem;">
+                            <strong>您的設定：</strong> <span id="val-user-target">-</span> | <span
+                                id="val-user-hours">-</span>
+                        </div>
+                        <div id="val-summary" style="line-height: 1.8; color: #444;">
+                            (等待評估結果...)
+                        </div>
+                    </div>
+
+                    <!-- 3. 關鍵數據 (4格) -->
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div style="color: #666; font-size: 0.9rem;">預估月營收</div>
+                            <div id="val-revenue"
+                                style="font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-top: 5px;">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div style="color: #666; font-size: 0.9rem;">預估翻桌率</div>
+                            <div id="val-turnover"
+                                style="font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-top: 5px;">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div style="color: #666; font-size: 0.9rem;">回本週期 (月)</div>
+                            <div id="val-roi"
+                                style="font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-top: 5px;">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div style="color: #666; font-size: 0.9rem;">每日客流預估</div>
+                            <div id="val-traffic"
+                                style="font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-top: 5px;">-</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 圖表區 -->
+                    <div class="charts-grid">
+                        <div class="chart-box">
+                            <h4 style="text-align: center; margin-bottom: 15px;">商圈五力分析</h4>
+                            <div style="height: 300px;"><canvas id="radarChart"></canvas></div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 style="text-align: center; margin-bottom: 15px;">財務預測損益</h4>
+                            <div style="height: 300px;"><canvas id="financeChart"></canvas></div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 style="text-align: center; margin-bottom: 15px;">成本結構分析</h4>
+                            <div style="height: 300px;"><canvas id="costChart"></canvas></div>
+                        </div>
+                        <div class="chart-box">
+                            <h4 style="text-align: center; margin-bottom: 15px;">人口年齡分佈</h4>
+                            <div style="height: 300px;"><canvas id="ageChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- 5. 詳細分析區 (單欄堆疊) -->
+                    <style>
+                        .analysis-box {
+                            background: #fff;
+                            border-radius: 12px;
+                            padding: 25px;
+                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+                            margin-bottom: 20px;
+                        }
+
+                        .analysis-title {
+                            color: #2c3e50;
+                            border-bottom: 2px solid #eee;
+                            padding-bottom: 10px;
+                            margin-bottom: 15px;
+                            font-size: 1.2rem;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+
+                        .analysis-content {
+                            line-height: 1.8;
+                            color: #444;
+                            white-space: pre-line;
+                            /* 保留換行 */
+                        }
+                    </style>
+
+                    <div class="analysis-section">
+                        <!-- 微觀人口 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-users-viewfinder"
+                                    style="color:#e74c3c;"></i> 微觀人口與消費力分析</h4>
+                            <div id="val-pop-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 區域租金 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-shop-lock" style="color:#f39c12;"></i>
+                                區域租金行情與門檻</h4>
+                            <div id="val-rent-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 市場競爭 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-chess-rook" style="color:#3498db;"></i>
+                                市場競爭態勢分析</h4>
+                            <div id="val-comp-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 生活機能 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-train-subway" style="color:#2ecc71;"></i>
+                                生活機能與交通節點</h4>
+                            <div id="val-func-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 空間規劃 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-compass-drafting"
+                                    style="color:#9b59b6;"></i> 空間規劃與坪效優化</h4>
+                            <div id="val-space-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 財務建議 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-file-invoice-dollar"
+                                    style="color:#34495e;"></i> 財務風險與投資建議</h4>
+                            <div id="val-fin-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 行銷建議 -->
+                        <div class="analysis-box">
+                            <h4 class="analysis-title"><i class="fa-solid fa-bullhorn" style="color:#e67e22;"></i>
+                                行銷策略與獲客建議</h4>
+                            <div id="val-mkt-body" class="analysis-content">分析中...</div>
+                        </div>
+
+                        <!-- 總結 -->
+                        <div class="analysis-box" style="border-left: 5px solid #ff7e33;">
+                            <h4 class="analysis-title"><i class="fa-solid fa-clipboard-check"
+                                    style="color:#ff7e33;"></i> 最終評估結論</h4>
+                            <div id="val-conclusion" class="analysis-content">分析中...</div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 

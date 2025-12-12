@@ -1,0 +1,163 @@
+/* CSS for PDF Export - High Contrast & Clean Layout */
+
+/* 1. Global Container Reset */
+.pdf-export-mode {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-family: "Noto Sans TC", sans-serif !important;
+    /* Ensure crisp font */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* 2. Text Color Enforcement (Strict Black) */
+.pdf-export-mode * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    -webkit-text-fill-color: #000000 !important;
+    /* Override gradients */
+    background: transparent !important;
+    /* Remove background colors from text elements */
+}
+
+/* 3. Exceptions: Keep Card/Container Backgrounds White & Visible */
+.pdf-export-mode .report-container,
+.pdf-export-mode .card,
+.pdf-export-mode .metric-card,
+.pdf-export-mode .analysis-card,
+.pdf-export-mode .chart-card,
+.pdf-export-mode .strategy-section {
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    /* Simple grey border */
+    box-shadow: none !important;
+    margin-bottom: 20px !important;
+    padding: 15px !important;
+    break-inside: avoid !important;
+    /* Prevent cutting cards in half */
+    page-break-inside: avoid !important;
+}
+
+/* 4. Headings & Typography */
+.pdf-export-mode h1,
+.pdf-export-mode h2,
+.pdf-export-mode h3,
+.pdf-export-mode h4,
+.pdf-export-mode h5,
+.pdf-export-mode h6 {
+    font-weight: bold !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.pdf-export-mode p,
+.pdf-export-mode li,
+.pdf-export-mode span,
+.pdf-export-mode label {
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+}
+
+/* 5. Metrics (Allow Color for Emphasis) */
+/* Override the strict black for specific metrics if desired, or keep black for safety */
+.pdf-export-mode .metric-value {
+    color: #000000 !important;
+    /* Keeping black for safety, or use #e67e22 if trusted */
+    font-weight: 800 !important;
+    font-size: 24px !important;
+}
+
+/* 6. Layout Flattening (Stack everything) */
+.pdf-export-mode .dashboard-grid,
+.pdf-export-mode .grid-2,
+.pdf-export-mode .grid-3 {
+    display: block !important;
+}
+
+.pdf-export-mode .col,
+.pdf-export-mode .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+}
+
+/* Specific Fix: Hero Section (Keep side-by-side if possible, or stack) */
+/* Stacking is safer for PDF pagination */
+.pdf-export-mode .dashboard-hero {
+    display: block !important;
+    border-bottom: 2px solid #000 !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 30px !important;
+}
+
+/* 7. Score Ring Fix */
+/* Flatten the score ring to a simple box if canvas rendering is poor */
+.pdf-export-mode .score-ring {
+    height: auto !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-bottom: 20px !important;
+}
+
+.pdf-export-mode .score-value {
+    position: static !important;
+    /* Remove absolute positioning */
+    transform: none !important;
+    margin-top: 10px !important;
+    text-align: center !important;
+}
+
+.pdf-export-mode .score-value .number {
+    font-size: 60px !important;
+    color: #000000 !important;
+}
+
+/* 8. Charts */
+.pdf-export-mode canvas {
+    background-color: #ffffff !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* 9. Header & Footer (PDF Only) */
+.pdf-header-visual,
+.pdf-footer-visual {
+    display: none;
+    /* Default hidden */
+}
+
+.pdf-export-mode .pdf-header-visual {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.pdf-export-mode .pdf-header-visual img {
+    height: 40px !important;
+    width: auto !important;
+}
+
+.pdf-export-mode .pdf-footer-visual {
+    display: block !important;
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+    text-align: center;
+    font-size: 10px;
+    color: #666 !important;
+}
+
+/* 10. Hide Interactive Elements */
+.pdf-export-mode button,
+.pdf-export-mode input,
+.pdf-export-mode select,
+.pdf-export-mode .no-print {
+    display: none !important;
+}
