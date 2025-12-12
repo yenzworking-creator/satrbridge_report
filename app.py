@@ -1,14 +1,15 @@
 from flask import Flask, render_template, request, jsonify
-from database_manager import DatabaseManager
-from location_service import LocationService
-from report_generator import ReportGenerator
-from email_service import EmailService
-import re
-import threading
-
 from report_service import ReportService
+from database_manager import DatabaseManager
+import threading
+import logging
+from whitenoise import WhiteNoise
+
+# Configure Logging
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s')
 
 app = Flask(__name__)
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
 # Initialize Modules
 # DatabaseManager will prompt loading but we can trigger it in background

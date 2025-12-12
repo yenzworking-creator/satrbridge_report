@@ -5,3 +5,4 @@ googlemaps
 requests
 openpyxl
 xlrd
+whitenoise
