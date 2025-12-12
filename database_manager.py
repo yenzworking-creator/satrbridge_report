@@ -17,93 +17,121 @@ class DatabaseManager:
         """
         Loads data only when needed, or in background.
         Uses pickle cache to speed up subsequent reloads.
+        Optimized for LOW MEMORY usage (Render Free Tier 512MB).
         """
         if self.is_loaded:
             return
 
-        cache_file = os.path.join(self.data_dir, "db_cache.pkl")
+        cache_file = os.path.join(self.data_dir, "db_cache_v2.pkl")
         
         # Try load from cache
         if os.path.exists(cache_file):
-            print("⚡ 發現快取檔案，正在快速載入資料庫...")
+            print("⚡ 發現快取檔案 (v2)，正在快速載入資料庫...")
             try:
+                # Use 'rb' and load
                 with open(cache_file, 'rb') as f:
                     data = pickle.load(f)
-                    self.pop_df = data['pop']
-                    self.tax_df = data['tax']
-                    self.mrt_df = data['mrt']
-                    self.rent_df = data['rent']
+                    self.pop_df = data.get('pop')
+                    self.tax_df = data.get('tax')
+                    self.mrt_df = data.get('mrt')
+                    self.rent_df = data.get('rent')
                 self.is_loaded = True
                 print(f"✅ 資料庫載入完成 (來自快取)")
                 return
             except Exception as e:
                 print(f"快取載入失敗，將重新讀取原始檔: {e}")
 
-        print("📥 正在讀取原始 Excel 檔案 (首次執行需約 10-20 秒)...")
+        print("📥 正在讀取原始 Excel 檔案 (記憶體優化模式)...")
         
-        # 1. Population
+        # 1. Population (Only need specific cols)
         try:
             pop_file = os.path.join(self.data_dir, "113年全台各村里性別人口統計.xlsx")
             if os.path.exists(pop_file):
-                self.pop_df = pd.read_excel(pop_file)
+                # Columns usually: 統計年, 區域別, 村里名稱, 總人口, 男, 女
+                # Try to load only relevant ones. But headers might vary.
+                # Safe approach: Load all but use 'dtype' to optimize
+                self.pop_df = pd.read_excel(pop_file) 
                 self.pop_df.columns = self.pop_df.columns.str.strip()
-                print(f"📊 [Pop DF Columns]: {list(self.pop_df.columns)}")
+                # Determine relevant columns
+                cols_to_keep = [c for c in self.pop_df.columns if c in ['區域別', '村里名稱', '女', '男']]
+                self.pop_df = self.pop_df[cols_to_keep].dropna()
+                print(f"📊 [Pop] Loaded. {len(self.pop_df)} rows.")
         except Exception as e: print(f"Pop Load Error: {e}")
 
-        # 2. Tax
+        # 2. Tax (Only need Tax Payers & Median)
         try:
             tax_file = os.path.join(self.data_dir, "111年度綜稅所得應納稅額及稅率各縣市申報統計表 (2).xlsx")
             if os.path.exists(tax_file):
                 self.tax_df = pd.read_excel(tax_file)
                 self.tax_df.columns = self.tax_df.columns.str.strip()
-                print(f"📊 [Tax DF Columns]: {list(self.tax_df.columns)}")
+                # Check known columns
+                keep = ['縣市別', '村里', '納稅單位(戶)', '中位數']
+                actual_keep = [c for c in keep if c in self.tax_df.columns]
+                self.tax_df = self.tax_df[actual_keep].dropna()
+                print(f"📊 [Tax] Loaded. {len(self.tax_df)} rows.")
         except Exception as e: print(f"Tax Load Error: {e}")
 
-        # 3. MRT
+        # 3. MRT (Flow matrix)
         try:
             mrt_file = os.path.join(self.data_dir, "202510各站進出量統計.xlsx")
             if os.path.exists(mrt_file):
-                # First, read without header to find the real header row
-                temp_df = pd.read_excel(mrt_file, header=None)
+                # ... Existing Header Logic ...
+                temp_df = pd.read_excel(mrt_file, header=None, nrows=10) # READ ONLY 10 ROWS FIRST
                 header_row_idx = 0
-                
-                # Check first 5 rows for station-like keywords
-                for i in range(5):
+                for i in range(10):
                     row_str = temp_df.iloc[i].astype(str).values
-                    # A18/A19 are stations. "日期" is common. "進站" is common.
                     if any("A18" in s or "A19" in s or "日期" in s or "車站" in s for s in row_str):
                         header_row_idx = i
                         break
                 
-                print(f"🚄 [MRT] Detected Header Row Index: {header_row_idx}")
                 self.mrt_df = pd.read_excel(mrt_file, header=header_row_idx)
-                # Clean columns (strip spaces)
                 self.mrt_df.columns = self.mrt_df.columns.astype(str).str.strip()
-                print(f"📊 [MRT Columns Sample]: {list(self.mrt_df.columns)[:5]}")
-        except Exception as e: 
-            print(f"❌ MRT Load Error: {e}")
+                # MRT df is usually small (rows = days of month, cols = stations). Keep as is.
+        except Exception as e: print(f"❌ MRT Load Error: {e}")
             
-        # 4. Rent (All files)
+        # 4. Rent (HEAVY! Optimization Critical)
         rent_files = glob.glob(os.path.join(self.data_dir, "全台租金*.xls*"))
         rent_frames = []
+        
+        # Define Columns we absolutely need
+        # '鄉鎮市區', '土地區段位置建物區段門牌', '移轉層次', '總額元', '單價元平方公尺', '建物總面積平方公尺'
+        required_cols = ['鄉鎮市區', '土地區段位置建物區段門牌', '移轉層次', '總額元', '單價元平方公尺', '建物總面積平方公尺']
+        
         for rf in rent_files:
             try:
-                # Use engine='openpyxl' for xlsx, default/xlrd for xls
-                # To be safe with generic read_excel
-                df = pd.read_excel(rf)
-                # Keep only necessary columns to save memory/time if possible
-                # But headers might vary, so keep all for now
-                rent_frames.append(df)
+                # Use Pandas usecols callable to handle slight name variations (e.g. '單價元平方公尺' vs '單價')
+                # But generic 'usecols' logic is tricky if headers vary.
+                # Strategy: Read headers first? Too many files. 
+                # Strategy: Read File. Select columns immediately. Drop NaN. Append.
+                
+                df = pd.read_excel(rf) # Read full
+                df.columns = df.columns.str.strip()
+                
+                # Filter Columns
+                found_cols = [c for c in df.columns if c in required_cols]
+                
+                if '鄉鎮市區' in found_cols: # Basic check
+                    df_mini = df[found_cols].copy()
+                    
+                    # Drop rows where Area is 0 to save space
+                    if '建物總面積平方公尺' in df_mini.columns:
+                        df_mini = df_mini[df_mini['建物總面積平方公尺'] > 0]
+                        
+                    rent_frames.append(df_mini)
+                
+                # Force Garbage Collection
+                del df
             except: pass
         
         if rent_frames:
             self.rent_df = pd.concat(rent_frames, ignore_index=True)
-            self.rent_df.columns = self.rent_df.columns.str.strip()
+            print(f"✅ [Rent] Loaded. {len(self.rent_df)} rows. (Mem Optimized)")
+        else:
+            print("⚠️ [Rent] No files loaded.")
 
         self.is_loaded = True
-        print(f"✅ 資料庫載入完成. 租金筆數: {len(self.rent_df) if self.rent_df is not None else 0}")
         
-        # Save cache
+        # Save Optimized Cache
         try:
             with open(cache_file, 'wb') as f:
                 pickle.dump({
@@ -112,9 +140,10 @@ class DatabaseManager:
                     'mrt': self.mrt_df,
                     'rent': self.rent_df
                 }, f)
-            print("💾 已建立快取檔案 db_cache.pkl (下次啟動將秒開)")
+            print("💾 已建立優化版快取 db_cache_v2.pkl")
         except Exception as e:
             print(f"⚠️ 無法建立快取: {e}")
+
 
     def get_village_data(self, city, district, village, mrt_station_name=None):
         if not self.is_loaded: self.load_data_lazily()
