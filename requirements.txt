@@ -4,3 +4,4 @@ pandas
 googlemaps
 requests
 openpyxl
+xlrd
