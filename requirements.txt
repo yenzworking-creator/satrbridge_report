@@ -1,0 +1,8 @@
+Flask
+pandas
+openpyxl
+requests
+python-dotenv
+gunicorn
+selenium
+webdriver-manager

@@ -1,0 +1,152 @@
+/* CSS for PDF Export - High Contrast & Clean Layout */
+
+/* 1. Global Container Reset */
+/* 1. Global Container Reset */
+/* 1. Global Container Reset */
+.pdf-export-mode {
+    background-color: #ffffff !important;
+    font-family: "Noto Sans TC", sans-serif !important;
+    /* Ensure crisp font */
+    width: 100% !important;
+    /* Controlled by Wrapper */
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+    /* Strict 0 margin to prevent skew */
+    padding: 0px !important;
+    box-shadow: none !important;
+    border: none !important;
+    top: 0 !important;
+    top: 0 !important;
+}
+
+/* Ensure Header is Visible in PDF */
+.pdf-export-mode.app-header {
+    display: flex !important;
+    position: relative !important;
+    background: #fff !important;
+    color: #333 !important;
+    border-bottom: 2px solid #ff7e33 !important;
+}
+
+.pdf-export-mode.app-header h1 {
+    color: #ff7e33 !important;
+    margin: 0 !important;
+}
+
+.pdf-export-mode.app-header span {
+    color: #666 !important;
+}
+
+/* 2. Text Color - ALLOW ORIGINAL COLORS (Reverted strict black) */
+.pdf-export-mode * {
+    /* Color enforcement removed to match web page look */
+    /* background: transparent !important; -> Removed to allow colored card backgrounds if any */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* 3. Exceptions: Keep Card/Container Backgrounds White & Visible */
+/* 3. Exceptions: Keep Card/Container Backgrounds White & Visible */
+/* Combined selector because pdf-export-mode is added TO the report-container */
+#reportPreview.pdf-export-mode,
+/* ID Selector for Max Specificity */
+.pdf-export-mode.report-preview,
+.pdf-export-mode.report-container,
+.pdf-export-mode .card,
+.pdf-export-mode .metric-card,
+.pdf-export-mode .analysis-card,
+.pdf-export-mode .chart-card,
+.pdf-export-mode .strategy-section {
+    background-color: #ffffff !important;
+    border: 1px solid #eee !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    margin-bottom: 15px !important;
+    padding: 10px !important;
+    /* Minimal padding */
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    max-width: none !important;
+    /* NUCLEAR: Remove ALL limits */
+    min-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 4. Headings & Typography */
+.pdf-export-mode h1,
+.pdf-export-mode h2,
+.pdf-export-mode h3,
+.pdf-export-mode h4,
+.pdf-export-mode h5,
+.pdf-export-mode h6 {
+    font-weight: bold !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    color: inherit !important;
+    /* Use original color */
+}
+
+/* 5. Layout Flattening (Stack everything) */
+.pdf-export-mode .dashboard-grid,
+.pdf-export-mode .grid-2,
+.pdf-export-mode .grid-3 {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    /* Force single column for PDF safety */
+}
+
+/* Force 4-grid metrics to stay grid or stack? 
+   User said "Like web page". Web page is grid. 
+   But PDF width is small (A4). 
+   Let's keep Grid if space permits, but typically stacking is safer for font size.
+   However, user complained about layout on web previously (3+1).
+   Let's try to KEEP grid for metrics if possible, but simpler.
+*/
+.pdf-export-mode .metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+}
+
+/* 6. Header & Footer (PDF Custom) - HIDDEN per user request for "Same as Web" */
+.pdf-export-mode .pdf-header-visual,
+.pdf-export-mode .pdf-footer-visual {
+    display: none !important;
+}
+
+/* 7. Hide Interactive Elements */
+.pdf-export-mode button,
+.pdf-export-mode input,
+.pdf-export-mode select,
+.pdf-export-mode .no-print,
+.pdf-export-mode .loading-overlay {
+    display: none !important;
+}
+
+/* 8. Charts */
+.pdf-export-mode canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* 9. Granular Text Protection */
+.pdf-export-mode p,
+.pdf-export-mode li,
+.pdf-export-mode h3,
+.pdf-export-mode h4,
+.pdf-export-mode h5,
+.pdf-export-mode .analysis-section,
+.pdf-export-mode .analysis-item,
+.pdf-export-mode .form-group {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    orphans: 4 !important;
+    widows: 4 !important;
+}
+
+/* Ensure no overflows */
+.pdf-export-mode {
+    overflow: visible !important;
+}

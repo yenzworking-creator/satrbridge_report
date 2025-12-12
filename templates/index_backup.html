@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidal Cassini | 智能店面選址評估</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;600&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+        <div class="globe globe-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="container">
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='logo_final.png') }}" alt="Star Bridge Media"
+                        class="brand-logo">
+                    <div class="brand-text">
+                        <h1>星橋創媒</h1>
+                        <p>商業地產選址評估系統</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="glass-card">
+            <form id="evaluationForm">
+                <div class="form-group">
+                    <label for="email"><i class="fa-regular fa-envelope"></i> 接收報告信箱</label>
+                    <input type="email" id="email" name="email" placeholder="example@company.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address"><i class="fa-solid fa-map-location-dot"></i> 預計店面地址</label>
+                    <input type="text" id="address" name="address" placeholder="台北市大安區..." required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="industry"><i class="fa-solid fa-store"></i> 產業類型</label>
+                        <select id="industry" name="industry">
+                            <option value="咖啡廳">咖啡廳</option>
+                            <option value="餐廳">餐廳</option>
+                            <option value="零售服飾">零售服飾</option>
+                            <option value="便利商店">便利商店</option>
+                            <option value="美容美髮">美容美髮</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group half">
+                        <label for="area"><i class="fa-solid fa-ruler-combined"></i> 坪數</label>
+                        <input type="number" id="area" name="area" placeholder="25" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="avg_price"><i class="fa-solid fa-dollar-sign"></i> 預計客單價 (TWD)</label>
+                    <input type="number" id="avg_price" name="avg_price" placeholder="150" required>
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    <span class="btn-text">開始 AI 評估</span>
+                    <span class="btn-loader" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i>
+                        分析中...</span>
+                </button>
+            </form>
+
+            <div id="resultArea" style="display: none;">
+                <div class="success-message">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <h3>評估完成！</h3>
+                    <p id="resultText">報告已寄送至您的信箱。</p>
+                    <button id="downloadPdfBtn" class="download-btn">
+                        <i class="fa-solid fa-file-pdf"></i> 下載 PDF 報告
+                    </button>
+                </div>
+
+                <div id="reportContainer" class="report-preview">
+                    <!-- Added Wrapper for Styling -->
+                    <div class="report-preview-inner">
+                        <!-- HTML Report will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            &copy; 2025 Tidal Cassini System. All Rights Reserved.
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

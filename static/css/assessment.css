@@ -1,0 +1,921 @@
+:root {
+    --primary-color: #ff7e33;
+    /* Brand Orange */
+    --primary-hover: #ff9554;
+    --bg-dark: #f8f9fa;
+    /* Changed to Light Gray */
+    --bg-panel: rgba(255, 255, 255, 0.9);
+    /* Changed to White */
+    --text-main: #333333;
+    /* Changed to Dark Gray */
+    --text-muted: #666666;
+    /* Changed to Medium Gray */
+    --border-color: rgba(0, 0, 0, 0.1);
+    /* Changed to faint black */
+    --success-color: #2ecc71;
+    --font-main: 'Inter', 'Noto Sans TC', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Dynamic Background */
+.background-mesh {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 10% 20%, rgba(255, 126, 51, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.05) 0%, transparent 40%),
+        linear-gradient(#f4f6f8, #eef2f5);
+    /* Light gradient */
+    z-index: -1;
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 5%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 126, 51, 0.4);
+}
+
+.logo-text h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.logo-text span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+}
+
+.intro-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.8s ease;
+}
+
+
+.intro-section h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #d35400, #2c3e50);
+    /* Dark Orange to Dark Blue */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* Standard property */
+}
+
+/* ... existing code ... */
+
+/* --- Refined Score Alignment (Vertical Stack) --- */
+.score-ring {
+    height: 160px !important;
+    /* Slightly reduced height for canvas area */
+    width: 300px !important;
+    margin: 0 auto;
+    /* Center horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Align bottom of canvas */
+    position: relative;
+    /* Removed absolute positioning logic */
+}
+
+
+
+.score-value-container {
+    text-align: center;
+    margin-top: -30px;
+    /* Pull up slightly into the arc */
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.score-value-container .number {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary-color);
+    display: block;
+}
+
+.score-value-container .label {
+    font-size: 1rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 5px;
+}
+
+
+.intro-section p {
+    color: var(--text-muted);
+}
+
+/* Glass Panel Form */
+.glass-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+}
+
+.form-section h3 {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.required {
+    color: var(--primary-color);
+}
+
+input,
+select,
+textarea {
+    background: #ffffff;
+    border: 1px solid #dcdfe6;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 126, 51, 0.1);
+}
+
+/* Ensure options are visible */
+option {
+    background-color: #ffffff;
+    /* Match panel bg */
+    color: var(--text-main);
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Buttons */
+.action-bar {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: inherit;
+}
+
+.btn.primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 126, 51, 0.3);
+}
+
+.btn.primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 126, 51, 0.4);
+}
+
+.btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn.secondary:hover {
+    border-color: white;
+    color: white;
+}
+
+.btn.download-btn {
+    background: var(--success-color);
+    color: white;
+    text-decoration: none;
+}
+
+.btn.text-btn {
+    background: none;
+    color: var(--text-muted);
+    text-decoration: underline;
+}
+
+/* Loading Overlay */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner-container {
+    text-align: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 126, 51, 0.3);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+
+.loading-steps {
+    list-style: none;
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.step {
+    margin-bottom: 0.8rem;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.step.active {
+    opacity: 1;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.step.done {
+    opacity: 1;
+    color: var(--success-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.step.done::before {
+    content: "\f00c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-right: 10px;
+}
+
+/* Animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Result Section Styles */
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.result-header h3 {
+    font-size: 1.8rem;
+    color: var(--success-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* Report Preview Container */
+.report-preview {
+    background: #f9f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-main);
+}
+
+.report-preview a {
+    color: var(--primary-color);
+    text-decoration: underline;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+
+.report-preview a:hover {
+    color: var(--primary-hover);
+}
+
+/* Action Buttons specific styling */
+.download-btn {
+    background: var(--success-color) !important;
+    color: white !important;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.text-btn {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-decoration: underline;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+.text-btn:hover {
+    color: white;
+}
+
+
+/* --- Dashboard Styles (Added by AntiGravity) --- */
+.dashboard-container {
+    padding: 2rem 0;
+    animation: fadeInUp 0.5s ease;
+}
+
+.dashboard-hero {
+    display: flex;
+    align-items: center;
+    gap: 5rem;
+    /* Increased from 3rem */
+    margin-bottom: 3rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 3rem;
+    /* Increased padding */
+}
+
+/* ... existing code ... */
+
+.score-value .number {
+    font-size: 3.5rem;
+    /* Larger number */
+    font-weight: 700;
+    color: var(--primary-color);
+    display: block;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    /* Add spacing between number and text */
+}
+
+.score-value .label {
+    font-size: 1rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    /* Add breathing room */
+}
+
+.summary-text {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.8;
+}
+
+/* Grids */
+.dashboard-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.charts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Cards */
+.metric-card,
+.chart-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-card {
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.metric-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.metric-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.chart-card h4 {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+.chart-insight {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: #ccc;
+    line-height: 1.5;
+}
+
+.wide {
+    grid-column: span 2;
+}
+
+/* Strategy Section */
+.strategy-section {
+    background: rgba(46, 204, 113, 0.05);
+    border: 1px solid rgba(46, 204, 113, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.strategy-section h3 {
+    color: var(--success-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+}
+
+.strategy-block {
+    margin-bottom: 1.5rem;
+}
+
+.strategy-block h4 {
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.strategy-block p {
+    color: #555;
+    padding-left: 1.8rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-hero {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .wide {
+        grid-column: span 1;
+    }
+}
+
+
+/* Analysis Grid Styles */
+.analysis-grid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+.analysis-card {
+    background: var(--bg-panel);
+    /* slightly transparent */
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.analysis-card:hover {
+    border-color: var(--primary-color);
+    background: #ffffff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.analysis-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 0.8rem;
+}
+
+.analysis-text {
+    color: #444;
+    line-height: 1.8;
+    font-size: 0.95rem;
+    white-space: pre-line;
+    /* Handle newlines from JSON */
+}
+
+.analysis-text p {
+    margin-bottom: 0.8rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.bg-highlight {
+    background: rgba(46, 204, 113, 0.05);
+    /* Slight green tint for finances */
+    border-color: rgba(46, 204, 113, 0.2);
+}
+
+.final-verdict {
+    background: linear-gradient(135deg, rgba(255, 126, 51, 0.1), rgba(0, 0, 0, 0));
+    border: 1px solid var(--primary-color);
+}
+
+
+/* --- Layout Fixes --- */
+
+/* Metrics Grid: Force 4 columns on desktop */
+@media (min-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Charts Grid: Force 2 columns on desktop */
+@media (min-width: 768px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Analysis Grid: Force 1 column (Stacked) */
+@media (min-width: 768px) {
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Consistent Spacing */
+.dashboard-grid {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Ensure wide items span correctly */
+.wide {
+    grid-column: 1 / -1;
+}
+
+/* Fix Chart Card Height consistency */
+.chart-card {
+    min-height: 350px;
+}
+
+/* --- Final Hardened Layout Fixes --- */
+
+/* Force Analysis Grid to Stack (1 Column) */
+.analysis-grid {
+    grid-template-columns: 100% !important;
+    display: grid;
+    gap: 1.5rem;
+}
+
+/* Force Score Value Positioning */
+.score-value {
+    top: 70% !important;
+    /* Move down significantly */
+    left: 50% !important;
+    transform: translate(-50%, 0) !important;
+    /* Change transform origin */
+    width: 200px;
+}
+
+.score-value .number {
+    margin-bottom: 0.2rem;
+}
+
+.score-value .label {
+    display: block;
+    margin-top: 0.5rem;
+}
+
+
+/* Safety: Prevent infinite chart resizing loop */
+.chart-wrapper {
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
+
+/* --- Fix Hero Layout (Graph 1) --- */
+.score-ring {
+    width: 250px !important;
+    height: 250px !important;
+    margin: 0 auto;
+    /* Center it */
+}
+
+.score-value {
+    top: 60% !important;
+    /* Move text nicely inside the larger ring */
+    width: 100% !important;
+}
+
+.score-value .number {
+    font-size: 3.5rem !important;
+    /* Ensure it pops */
+    margin-bottom: 0px !important;
+}
+
+/* Fix Hero Container alignment */
+.dashboard-hero {
+    align-items: flex-start !important;
+    /* Align to top so large ring doesn't push summary weirdly */
+}
+
+
+/* --- Refined Score Alignment (Final) --- */
+.score-ring {
+    /* Ensure sufficient height for the semi-circle + text below */
+    height: 180px !important;
+    width: 300px !important;
+    /* Wider to prevent crop */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Align chart to bottom? No, top */
+    margin-bottom: 2rem;
+    /* Space for text below if needed */
+}
+
+/* Move the score text to perfectly sit inside/below the arc */
+.score-value {
+    top: auto !important;
+    bottom: 0 !important;
+    /* Align to bottom of the box */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+}
+
+.score-value .number {
+    font-size: 4.5rem !important;
+    line-height: 0.8 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.score-value .label {
+    font-size: 1rem !important;
+}
+
+
+/* --- Fix Figure 1: Score Position --- */
+.score-value {
+    bottom: 35px !important;
+    /* Lift it up significantly from the bottom */
+}
+
+.score-ring {
+    margin-bottom: 0 !important;
+    /* Remove extra space below ring */
+    height: 160px !important;
+    /* Reduce height slightly to tighten spacing */
+}
+
+/* --- Utility Classes (Restored) --- */
+.hidden {
+    display: none !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+
+/* Ensure 'Other' input is visible when shown */
+#industryTypeOther {
+    display: block;
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Hide it properly if class is present (override above) */
+#industryTypeOther.hidden {
+    display: none !important;
+}
