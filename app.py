@@ -37,7 +37,25 @@ def evaluate():
 
     except Exception as e:
         print(f"❌ Server Error: {e}")
-        return jsonify({"success": False, "message": str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": str(e), "trace": traceback.format_exc()}), 500
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        "success": False,
+        "message": "Internal Server Error",
+        "error": str(error)
+    }), 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        "success": False,
+        "message": "Resource Not Found",
+        "error": str(error)
+    }), 404
 
 if __name__ == '__main__':
     # Start loading thread
